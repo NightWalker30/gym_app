@@ -1,45 +1,97 @@
-import { Tabs } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+const _layout = () => {
   return (
-    <Tabs
+
+<View style={styles.countainer}>
+
+<Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: '#554534',
+        tabBarItemStyle: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        tabBarStyle: {
+          backgroundColor: '#deadad',
+          marginBottom: 30,
+          marginHorizontal: 5,
+          borderRadius:50,
+          height: 55,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name={focused ? 'home' : 'home-outline'}
+              size={24}
+              color={focused ? '#8d3a3a' : 'gray'}
+            />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="search"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Search',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name={focused ? 'search' : 'search-outline'}
+              size={24}
+              color={focused ? '#8d3a3a' : 'gray'}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="saved"
+        options={{
+          title: 'Saved',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name={focused ? 'bookmark' : 'bookmark-outline'}
+              size={24}
+              color={focused ? '#8d3a3a' : 'gray'}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name={focused ? 'person' : 'person-outline'}
+              size={24}
+              color={focused ? '#8d3a3a' : 'gray'}
+            />
+          ),
         }}
       />
     </Tabs>
+</View>
   );
-}
+};
+
+export default _layout;
+
+const styles = StyleSheet.create({
+  countainer:{
+  flex:1,
+  backgroundColor:'#000000'
+  }
+});
