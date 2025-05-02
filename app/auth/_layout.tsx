@@ -8,13 +8,18 @@ export default function AuthLayout() {
 
   return (
 
+  //   <Stack
+  //   screenOptions={{
+  //     headerShown: false, // On cache tous les headers
+  //     contentStyle: { backgroundColor: 'light' },
+  //   }}
+  // >
 
-
-   <Stack>
+   <Stack   screenOptions={{
+      headerShown: false, // On cache tous les headers
+        contentStyle: { backgroundColor: 'light' },
+     }}>
    <Stack.Screen  name='login' options={{headerShown:false}}        />
-
-
-
    </Stack>
   );
 }

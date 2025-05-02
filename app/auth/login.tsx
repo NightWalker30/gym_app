@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import {
   Text,
   View,
@@ -12,71 +14,70 @@ import {
 } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import axios from "../../outils/axios";
-import { useNavigation } from '@react-navigation/native';
+
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const router = useRouter();
-  const navigation = useNavigation();
+
 
   const handleLogin = async () => {
-    if (!username || !password) {
+   //Alert.alert("vous avec appuyer sur la botton login bro")
+    if (!email || !password) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
     try {
-      const response = await axios.post("/login", { username, password });
+      const response = await axios.post("/login", { email, password });
 
       if (response.data.success) {
-     //   Alert.alert("Succès", "Connexion réussie !");
-        router.replace("/(tabs)");
+        await AsyncStorage.setItem("userEmail", email);
+       // Alert.alert("Succès", "Connexion réussie !");
+        router.replace("/(tabs)/entrainement");
       } else {
         Alert.alert("Erreur", "Nom d'utilisateur ou mot de passe incorrect.");
       }
     } catch (error: any) {
-      console.error("Erreur :", error.response?.data || error.message);
+     // console.error("Erreur :", error.response?.data || error.message);
       Alert.alert("Erreur", error.response?.data?.message || "Échec de connexion.");
     }
   };
 
   const handleGoogleLogin = () => {
     Alert.alert("Google Login", "Connexion avec Google en cours...");
-    // Implémente l'intégration OAuth ici
+
   };
 
-  const handleFacebookLogin = () => {
-    Alert.alert("Facebook Login", "Connexion avec Facebook en cours...");
-    // Implémente l'intégration OAuth ici
-  };
+
 
   const goToSignUp = () => {
-    router.push("/auth/signup"); // Remplace par la route d'inscription réelle
+  router.push("/auth/signUp/formulaire"); 
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Image
-        source={require("../../assets/images/kip.png")}
+       source={require("../../assets/images/kilo.png")}
         style={styles.logo}
       />
 
-      {/* Entrée du nom d'utilisateur */}
+  
       <View style={styles.inputContainer}>
         <Ionicons name="mail" size={24} color="#43e03d" style={styles.icon} />
         <TextInput
-          placeholder="Nom d'utilisateur"
+          placeholder="Username "
           placeholderTextColor="#999"
           keyboardType="email-address"
           style={styles.input}
-          value={username}
+          value={email}
           onChangeText={setUsername}
           autoCapitalize="none"
         />
       </View>
 
-      {/* Entrée du mot de passe */}
+     
       <View style={styles.inputContainer}>
         <Ionicons
           name="lock-closed"
@@ -85,7 +86,7 @@ export default function Login() {
           style={styles.icon}
         />
         <TextInput
-          placeholder="Mot de passe"
+          placeholder="mot de pass"
           placeholderTextColor="#999"
           secureTextEntry
           style={styles.input}
@@ -99,20 +100,13 @@ export default function Login() {
         <Text style={styles.loginText}>Se connecter</Text>
       </TouchableOpacity>
 
-      {/* Autres moyens de connexion */}
+   
       <Text style={styles.orText}>Ou connectez-vous avec</Text>
       <View style={styles.socialContainer}>
         <TouchableOpacity onPress={handleGoogleLogin} style={styles.socialButton}>
           <FontAwesome name="google" size={28} color="#db4437"  />
         </TouchableOpacity>
-        </View>
-        <View>
-        <TouchableOpacity onPress={handleFacebookLogin} style={styles.socialButton}>
-          <FontAwesome name="facebook" size={28} color="#3b5998" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Lien vers la page d'inscription */}
+        </View>      
       <View style={styles.signupContainer}>
         <Text style={{ color: "#aaa" }}>Vous n'avez pas de compte ? </Text>
         <TouchableOpacity onPress={goToSignUp}>
@@ -132,9 +126,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
     marginBottom: 40,
     borderWidth: 2,
     borderColor: "#43e03d",

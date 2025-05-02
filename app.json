@@ -4,7 +4,7 @@
     "slug": "app_ilyas",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logos.png",
+    "icon": "./assets/images/kilo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,21 +13,21 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logos.png",
+        "foregroundImage": "./assets/images/kilo.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/logos.png"
+      "favicon": "./assets/images/kilo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logos.png",
+          "image": "./assets/images/kilo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"

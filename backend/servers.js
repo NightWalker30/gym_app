@@ -1,19 +1,35 @@
 const express = require('express');
 const connectDB = require('./config/db');
-const authRoutes = require('./routes/auth');
+const authRoute = require('./routes/auth');  
+const signUpRoute = require('./routes/signUp');
+const profileRoute = require('./routes/getProfile');
+
 const cors = require('cors');
 
 const app = express();
 const PORT = 5000;
+
+// Connexion à MongoDB
 connectDB();
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
-app.get('/hello',(req,res)=>{
- res.json({messag:'hello bro how are u'})
-//res.json({ message: 'Hello depuis Express 👋' });
-})
-app.use('/api', authRoutes);
-// Lancement du serveur
+
+// Routes de test
+app.post('/karim', (req, res) => {
+  res.json({ message: 'Hello bro, how are you karm?' });
+});
+app.get('/person', (req, res) => {
+  res.json({ message: 'Hello bro, how are you?' });
+});
+
+
+app.use('/api', authRoute);
+app.use('/api', signUpRoute);
+app.use('/api', profileRoute); 
+
+
 app.listen(PORT, () => {
- console.log(`Serveur ensur http://localhost:${PORT}`);
+  console.log(`Serveur lancé sur http://localhost:${PORT}`);
 });

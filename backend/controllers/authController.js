@@ -1,28 +1,33 @@
-const User = require('../models/User');
+const User = require('../models/Utilisateur'); // Modèle d'utilisateur
 
-exports.loginUser = async (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ message: "Champs requis manquants." });
-  }
+// Fonction pour la connexion de l'utilisateur
+exports.login = async (req, res) => {
   try {
-    // Recherche si l'utilisateur existe
-    let user = await User.findOne({ username });
+    const { email, password } = req.body;
+
+    // Vérifier si l'email et le mot de passe sont fournis
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Veuillez fournir un email et un mot de passe." });
+    }
+
+    // Trouver l'utilisateur par son email
+    const user = await User.findOne({ email });
+
+    // Vérifier si l'utilisateur existe
     if (!user) {
-      // Si l'utilisateur n'existe pas, on le crée (juste pour le test)
-      user = await User.create({ username, password });
-      return res.status(201).json({ success: true, message: "Utilisateur créé avec succès !" });
+      return res.status(400).json({ success: false, message: "Nom d'utilisateur ou mot de passe incorrect." });
     }
 
-   
+    // Vérifier si le mot de passe correspond
     if (user.password !== password) {
-      return res.status(401).json({ success: false, message: "Mot de passe incorrect." });
+      return res.status(400).json({ success: false, message: "Nom d'utilisateur ou mot de passe incorrect." });
     }
 
-    return res.status(200).json({ success: true, message: "Connexion réussie !" });
+    // Si tout est correct, envoyer une réponse de succès
+    res.status(200).json({ success: true, message: "Connexion réussie !" });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error('Erreur serveur :', error);
+    res.status(500).json({ success: false, message: 'Erreur interne du serveur' });
   }
 };

@@ -1,97 +1,105 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const _layout = () => {
   return (
-
-<View style={styles.countainer}>
-
-<Tabs
-      screenOptions={{
-        tabBarShowLabel: true,
-        tabBarActiveTintColor: '#554534',
-        tabBarItemStyle: {
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-        tabBarStyle: {
-          backgroundColor: '#deadad',
-          marginBottom: 30,
-          marginHorizontal: 5,
-          borderRadius:50,
-          height: 55,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name={focused ? 'home' : 'home-outline'}
-              size={24}
-              color={focused ? '#8d3a3a' : 'gray'}
-            />
-          ),
+    <View style={styles.container}>
+      <Tabs
+        screenOptions={{
+          tabBarShowLabel: true,
+          tabBarActiveTintColor: '#0a09f4',
+          tabBarStyle: {
+            backgroundColor: '#ffffff',
+            height: 60,
+            marginBottom: 0,
+            marginHorizontal: 0,
+          
+          },
         }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name={focused ? 'search' : 'search-outline'}
-              size={24}
-              color={focused ? '#8d3a3a' : 'gray'}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="saved"
-        options={{
-          title: 'Saved',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name={focused ? 'bookmark' : 'bookmark-outline'}
-              size={24}
-              color={focused ? '#8d3a3a' : 'gray'}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name={focused ? 'person' : 'person-outline'}
-              size={24}
-              color={focused ? '#8d3a3a' : 'gray'}
-            />
-          ),
-        }}
-      />
-    </Tabs>
-</View>
+      >
+        <Tabs.Screen
+          name="entrainement"
+          options={{
+            title: 'Entraînement',
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? 'barbell' : 'barbell-outline'}
+                size={24}
+                color={focused ? '#0a09f4' : 'gray'}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="personaliser"
+          options={{
+            title: 'Personnalisé',
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? 'sparkles' : 'sparkles-outline'}
+                size={24}
+                color={focused ? '#0a09f4' : 'gray'}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="exercices"
+          options={{
+            title: 'Exercices',
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? 'accessibility-outline' : 'accessibility-outline'}
+                size={24}
+                color={focused ? '#0a09f4' : 'gray'}
+              />
+            ),
+          }}
+        />
+             <Tabs.Screen
+          name="statistique"
+          options={{
+            title: 'statistique',
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? 'stats-chart-outline' : 'stats-chart-outline'}
+                size={24}
+                color={focused ? '#0a09f4' : 'gray'}
+              />
+            ),
+          }}
+        />
+         
+        <Tabs.Screen
+          name="moi"
+          options={{
+            title: 'Moi',
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? 'person-circle' : 'person-circle-outline'}
+                size={24}
+                color={focused ? '#0a09f4' : 'gray'}
+              />
+            ),
+          }}
+        />
+      </Tabs>
+    </View>
   );
 };
 
 export default _layout;
 
 const styles = StyleSheet.create({
-  countainer:{
-  flex:1,
-  backgroundColor:'#000000'
-  }
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
 });
