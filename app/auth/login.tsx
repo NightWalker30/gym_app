@@ -36,7 +36,7 @@ export default function Login() {
         const token = response.data.token; // Récupérer le token JWT
   
         // Afficher le token dans la console
-        console.log("Token JWT reçu:", token);
+       // console.log("Token JWT reçu:", token);
   
         // Stocker le token dans AsyncStorage (si nécessaire après le test)
         await AsyncStorage.setItem("userToken", token);

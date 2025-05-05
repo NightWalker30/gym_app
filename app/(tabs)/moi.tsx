@@ -1,42 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from '../../outils/axios';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { useRouter } from "expo-router";
-const Profile = () => {
-  const router=useRouter()
+import { useRouter } from 'expo-router';
+
+const calculerAge = (dateNaissance: string): number => {
+  const naissance = new Date(dateNaissance);
+  const today = new Date();
+  let age = today.getFullYear() - naissance.getFullYear();
+  const m = today.getMonth() - naissance.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < naissance.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+
+const Moi = () => {
   const [profileData, setProfileData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
+  const router = useRouter();
+
   useEffect(() => {
-    const loadEmailAndFetchProfile = async () => {
+    const loadProfile = async () => {
       try {
-        const storedEmail = await AsyncStorage.getItem("userEmail");
-        if (storedEmail) {
-          setEmail(storedEmail);
-          const response = await axios.post('/profile', { email: storedEmail });
-          setProfileData(response.data.profile);
-        } else {
-          setError('Aucun email trouvé. Veuillez vous reconnecter.');
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+          setError('Token manquant, veuillez vous reconnecter.');
+          return;
         }
+
+        const response = await axios.post('/profile', {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setProfileData(response.data.profile);
       } catch (err: any) {
-        setError(err.response?.data.message || 'Erreur inconnue');
+        setError('Erreur de chargement du profil');
+        console.error(err);
       }
     };
-    loadEmailAndFetchProfile();
-  }, []);
 
-  const handleLogout = async () => {
-    try {
-   //   await axios.post('/logout');
-      await AsyncStorage.removeItem("userEmail");
-    //  Alert.alert('Déconnexion', 'Vous avez été déconnecté avec succès.');
-      router.replace("/auth/login");
-    } catch (err) {
-      Alert.alert('Erreur', 'Échec de la déconnexion.');
-    }
-  };
+    loadProfile();
+  }, []);
 
   if (error) {
     return (
@@ -54,32 +63,35 @@ const Profile = () => {
     );
   }
 
+  const age = calculerAge(profileData.date_naissance);
+
   return (
     <SafeAreaView style={styles.container}>
-      <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} style={styles.avatar} />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} style={styles.avatar} />
+        <Text style={styles.name}>{profileData.prenom} {profileData.nom}</Text>
+        <Text style={styles.email}>{profileData.email}</Text>
 
-      <Text style={styles.name}>{profileData.prenom} {profileData.nom}</Text>
-      <Text style={styles.email}>{profileData.email}</Text>
+        <View style={styles.infoBox}>
+          <Text style={styles.label}>Ville :</Text>
+          <Text style={styles.value}>{profileData.ville}</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Icon name="location-outline" size={22} color="#666" />
-        <Text style={styles.cardText}>Ville: {profileData.ville}</Text>
-      </View>
+        <View style={styles.infoBox}>
+          <Text style={styles.label}>Pays :</Text>
+          <Text style={styles.value}>{profileData.pay}</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Icon name="calendar-outline" size={22} color="#666" />
-        <Text style={styles.cardText}>Âge: {profileData.age}</Text>
-      </View>
+        <View style={styles.infoBox}>
+          <Text style={styles.label}>Date de naissance :</Text>
+          <Text style={styles.value}>{new Date(profileData.date_naissance).toLocaleDateString()}</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Icon name="flag-outline" size={22} color="#666" />
-        <Text style={styles.cardText}>Pays: {profileData.pay}</Text>
-      </View>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Icon name="log-out-outline" size={20} color="#fff" />
-        <Text style={styles.logoutText}>Déconnexion</Text>
-      </TouchableOpacity>
+        <View style={styles.infoBox}>
+          <Text style={styles.label}>Âge :</Text>
+          <Text style={styles.value}>{age} ans</Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -87,9 +99,12 @@ const Profile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#f8f8f8',
+  },
+  scrollContainer: {
+    alignItems: 'center',
     paddingTop: 50,
+    paddingBottom: 30,
   },
   avatar: {
     width: 120,
@@ -106,37 +121,21 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 20,
   },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+  infoBox: {
     width: '90%',
+    backgroundColor: '#fff',
     padding: 15,
-    marginVertical: 8,
+    marginVertical: 5,
     borderRadius: 10,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  cardText: {
-    marginLeft: 10,
+  label: {
+    fontSize: 14,
+    color: '#999',
+  },
+  value: {
     fontSize: 16,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 30,
-    backgroundColor: '#e53935',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 25,
-  },
-  logoutText: {
-    color: '#fff',
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   error: {
     color: 'red',
@@ -145,8 +144,10 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   text: {
-    fontSize: 18,
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
-export default Profile;
+export default Moi;

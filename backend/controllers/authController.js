@@ -22,11 +22,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Nom d'utilisateur ou mot de passe incorrect." });
     }
 
-    console.log('Utilisateur trouvé:', user);
+    //console.log('Utilisateur trouvé:', user);
 
     // Comparer le mot de passe fourni avec celui stocké (haché)
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Match des mots de passe:', isMatch);
+   // console.log('Match des mots de passe:', isMatch);
 
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Nom d'utilisateur ou mot de passe incorrect." });
@@ -39,7 +39,7 @@ exports.login = async (req, res) => {
       { expiresIn: '1h' }                     // Durée d'expiration du token (1 heure dans cet exemple)
     );
 
-    console.log('Token généré:', token);
+    //console.log('Token généré:', token);
 
     // Répondre avec le token JWT
     res.status(200).json({ 
