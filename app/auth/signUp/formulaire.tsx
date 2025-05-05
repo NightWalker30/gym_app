@@ -1,99 +1,199 @@
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native'
-import React, { useState } from 'react'
+import {
+    Alert,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    Image,
+    Platform
+} from 'react-native';
+import React, { useState } from 'react';
 import { useRouter } from "expo-router";
+import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "../../../outils/axios";
 
 const Formulaire = () => {
     const [prenom, setPrenom] = useState("");
     const [nom, setName] = useState("");
-    const [age, setAge] = useState("");
+    const [date_naissance, setDateNaissance] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [pay, setPay] = useState("");
     const [ville, setVille] = useState("");
     const [email, setGmail] = useState("");
-    const [password, setPassword] = useState("");  // État pour le mot de passe
+    const [password, setPassword] = useState("");
+    const [validPrenom, setValidPrenom] = useState(true);
+    const [validNom, setValidNom] = useState(true);
+    const [validDate, setValidDate] = useState(true);
+    const [validPay, setValidPay] = useState(true);
+    const [validVille, setValidVille] = useState(true);
+    const [validEmail, setValidEmail] = useState(true);
+    const [validPassword, setValidPassword] = useState(true);
     const router = useRouter();
 
+    const hasNumbers = (str: string) => /\d/.test(str);
+    const isValidGmail = (email: string) => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
+
     const handleSignUp = async () => {
-        if (!prenom || !nom || !age || !pay || !ville || !email || !password) {
-            Alert.alert("Veuillez remplir tous les champs.");
+        let formIsValid = true;
+
+        if (!prenom) {
+            setValidPrenom(false);
+            formIsValid = false;
+        }
+
+        if (!nom) {
+            setValidNom(false);
+            formIsValid = false;
+        }
+
+        if (!pay) {
+            setValidPay(false);
+            formIsValid = false;
+        }
+
+        if (!ville) {
+            setValidVille(false);
+            formIsValid = false;
+        }
+
+        if (!isValidGmail(email)) {
+            setValidEmail(false);
+            formIsValid = false;
+        }
+
+        if (password.length <= 5) {
+            setValidPassword(false);
+            formIsValid = false;
+        }
+
+        if (!formIsValid) {
+            Alert.alert("Veuillez remplir tous les champs correctement.");
             return;
         }
+
         try {
-            const response = await axios.post("/signUp", { prenom, nom, age, pay, ville, email, password });
+            const response = await axios.post("/signUp", {
+                prenom,
+                nom,
+                date_naissance,
+                pay,
+                ville,
+                email,
+                password
+            });
+
             if (response.data.success) {
                 Alert.alert('Bravo, inscription réussie !');
-                router.push("/auth/login")
+                router.push("/auth/login");
             } else {
                 Alert.alert('Un champ incorrect.');
             }
-        } catch (error: any) {
-
-           // Alert.alert("Erreur", error.response?.data?.message || "Échec de connexion.");
-            Alert.alert("Erreur", error.response?.data?.message || error.message || "Échec de connexion.");
-           // Alert.alert(Response.data.success);
+        } catch (error) {
+            Alert.alert("Erreur", "Échec de connexion.");
         }
-    }
+    };
 
     const goLogin = () => {
         router.push("/auth/login");
-    }
+    };
+
+    const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+        setShowDatePicker(false); // Cacher le sélecteur de date après sélection
+        if (selectedDate) {
+            setDateNaissance(selectedDate);
+            setValidDate(true); // Réinitialiser la validité
+        }
+    };
 
     return (
         <View style={styles.container}>
-            {/* Image décorative en haut */}
             <View style={styles.imageContainer}>
-                <Image 
+                <Image
                     source={require("../../../assets/images/img2.jpg")}
                     style={styles.image}
                 />
             </View>
 
-            <Text style={styles.title}>Inscription</Text>
+            <Text style={styles.title}>Créer un compte</Text>
 
             <TextInput
-                style={styles.input}
+                style={[styles.input, !validPrenom && styles.invalidInput]}
                 placeholder="Prénom"
                 value={prenom}
-                onChangeText={setPrenom}
+                onChangeText={(text) => {
+                    setPrenom(text);
+                    setValidPrenom(true); // Réinitialiser la validité
+                }}
             />
             <TextInput
-                style={styles.input}
+                style={[styles.input, !validNom && styles.invalidInput]}
                 placeholder="Nom"
                 value={nom}
-                onChangeText={setName}
+                onChangeText={(text) => {
+                    setName(text);
+                    setValidNom(true);
+                }}
             />
+
+            {/* Suppression de l'entrée manuelle pour la date et utilisation du calendrier */}
+            <TouchableOpacity 
+                style={[styles.input, !validDate && styles.invalidInput]}
+                onPress={() => setShowDatePicker(true)} // Afficher le calendrier lorsque l'utilisateur appuie
+            >
+                <Text style={{ color: '#555' }}>
+                    {date_naissance ? `${date_naissance.getDate().toString().padStart(2, '0')}/${(date_naissance.getMonth() + 1).toString().padStart(2, '0')}/${date_naissance.getFullYear()}` : 'Date de naissance'}
+                </Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+                <DateTimePicker
+                    value={date_naissance}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    maximumDate={new Date()}
+                    onChange={handleDateChange}
+                />
+            )}
+
             <TextInput
-                style={styles.input}
-                placeholder="Âge"
-                value={age}
-                onChangeText={setAge}
-                keyboardType="numeric"
-            />
-            <TextInput
-                style={styles.input}
+                style={[styles.input, !validPay && styles.invalidInput]}
                 placeholder="Pays"
                 value={pay}
-                onChangeText={setPay}
+                onChangeText={(text) => {
+                    setPay(text);
+                    setValidPay(true);
+                }}
             />
             <TextInput
-                style={styles.input}
+                style={[styles.input, !validVille && styles.invalidInput]}
                 placeholder="Ville"
                 value={ville}
-                onChangeText={setVille}
+                onChangeText={(text) => {
+                    setVille(text);
+                    setValidVille(true);
+                }}
             />
             <TextInput
-                style={styles.input}
-                placeholder="Email"
+                style={[styles.input, !validEmail && styles.invalidInput]}
+                placeholder="Email (ex: exemple@gmail.com)"
                 value={email}
-                onChangeText={setGmail}
+                onChangeText={(text) => {
+                    setGmail(text);
+                    setValidEmail(true);
+                }}
                 keyboardType="email-address"
             />
             <TextInput
-                style={styles.input}
+                style={[styles.input, !validPassword && styles.invalidInput]}
                 placeholder="Mot de passe"
                 value={password}
-                onChangeText={setPassword}
-                secureTextEntry={true}  // Cache le texte du mot de passe
+                onChangeText={(text) => {
+                    setPassword(text);
+                    setValidPassword(true);
+                }}
+                secureTextEntry={true}
             />
 
             <TouchableOpacity style={styles.button} onPress={handleSignUp}>
@@ -104,69 +204,68 @@ const Formulaire = () => {
                 <Text style={styles.linkText}>Déjà un compte ? Se connecter</Text>
             </TouchableOpacity>
         </View>
-    )
-}
+    );
+};
 
 export default Formulaire;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        padding: 25,
+        backgroundColor: '#f2f6ff',
         justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#f9f9f9'
     },
     imageContainer: {
-        width: '100%',
-        height: 200,
-        marginBottom: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
+        height: 180,
+        marginBottom: 25,
+        borderRadius: 12,
         overflow: 'hidden',
-        borderRadius: 10,
+        alignItems: 'center',
     },
     image: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
-        borderRadius: 10,
+        resizeMode: 'cover'
     },
     title: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
-        marginBottom: 20,
-        color: '#333'
+        marginBottom: 25,
+        color: '#222',
+        textAlign: 'center',
     },
     input: {
-        width: '100%',
-        height: 45,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        marginBottom: 15,
-        paddingHorizontal: 10,
-        borderRadius: 5,
+        height: 48,
         backgroundColor: '#fff',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        marginBottom: 15,
+        borderColor: '#d0d7e2',
+        borderWidth: 1,
+    },
+    invalidInput: {
+        borderColor: 'red', // Rouge pour un champ invalide
     },
     button: {
-        backgroundColor: '#007bff',
-        width: '100%',
-        height: 45,
-        justifyContent: 'center',
+        backgroundColor: '#005eff',
+        paddingVertical: 13,
+        borderRadius: 8,
         alignItems: 'center',
-        borderRadius: 5,
-        marginBottom: 15,
+        marginTop: 10,
+        marginBottom: 10,
     },
     buttonText: {
         color: '#fff',
+        fontWeight: '600',
         fontSize: 16,
-        fontWeight: 'bold',
     },
     link: {
-        marginTop: 10,
+        alignItems: 'center',
     },
     linkText: {
-        color: '#007bff',
-        fontSize: 16,
+        color: '#005eff',
+        fontSize: 15,
+        marginTop: 5,
     }
 });

@@ -24,26 +24,33 @@ export default function Login() {
 
 
   const handleLogin = async () => {
-   //Alert.alert("vous avec appuyer sur la botton login bro")
     if (!email || !password) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
+  
     try {
       const response = await axios.post("/login", { email, password });
-
+  
       if (response.data.success) {
-        await AsyncStorage.setItem("userEmail", email);
-       // Alert.alert("Succès", "Connexion réussie !");
+        const token = response.data.token; // Récupérer le token JWT
+  
+        // Afficher le token dans la console
+        console.log("Token JWT reçu:", token);
+  
+        // Stocker le token dans AsyncStorage (si nécessaire après le test)
+        await AsyncStorage.setItem("userToken", token);
+  
+        // Rediriger l'utilisateur vers la page d'accueil
         router.replace("/(tabs)/entrainement");
       } else {
         Alert.alert("Erreur", "Nom d'utilisateur ou mot de passe incorrect.");
       }
-    } catch (error: any) {
-     // console.error("Erreur :", error.response?.data || error.message);
-      Alert.alert("Erreur", error.response?.data?.message || "Échec de connexion.");
+    } catch (error) {
+      Alert.alert("Erreur", "Échec de connexion.");
     }
   };
+  
 
   const handleGoogleLogin = () => {
     Alert.alert("Google Login", "Connexion avec Google en cours...");
