@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from '../../outils/axios';
 import { useRouter } from 'expo-router';
@@ -91,6 +91,13 @@ const Moi = () => {
           <Text style={styles.label}>Âge :</Text>
           <Text style={styles.value}>{age} ans</Text>
         </View>
+
+        {/* Bouton vers outils */}
+        <View style={styles.buttonContainer}>
+          <Text style={styles.button} onPress={() => router.push('/seances/outils')}>
+            Voir les outils de salle d'entraînement
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -147,6 +154,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
+  },
+  buttonContainer: {
+    marginTop: 20,
+    width: '90%',
+    alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    color: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    overflow: 'hidden',
   },
 });
 

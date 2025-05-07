@@ -34,7 +34,7 @@ export default function ChooseSession() {
         transition={{ delay: 200, type: 'timing' }}
         style={styles.card}
       >
-        <TouchableOpacity onPress={() => router.push("/seances/muscultation")}>
+        <TouchableOpacity onPress={() => router.push("/seances/musculation")}>
           <Image
             source={require("../../assets/images/musulp.jpg")}
             style={styles.image}
@@ -49,7 +49,7 @@ export default function ChooseSession() {
         transition={{ delay: 400, type: 'timing' }}
         style={styles.card}
       >
-        <TouchableOpacity onPress={() => router.push("/seances/muscultation")}>
+        <TouchableOpacity onPress={() => router.push("/seances/musculation")}>
           <Image
             source={require("../../assets/images/run.jpg")}
             style={styles.image}

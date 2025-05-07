@@ -4,7 +4,9 @@ const connectDB = require('./config/db');
 const authRoute = require('./routes/auth');  
 const signUpRoute = require('./routes/signUp');
 const profileRoute = require('./routes/getProfile');
-
+const seanceRouter=require('./routes/seance')
+const getSeanceRouter=require('./routes/getSeance')
+const ajouterExerciceRouter=require('./routes/ajouterExercieRouter')
 const cors = require('cors');
 
 const app = express();
@@ -29,7 +31,9 @@ app.get('/person', (req, res) => {
 app.use('/api', authRoute);
 app.use('/api', signUpRoute);
 app.use('/api', profileRoute); 
-
+app.use('/api',seanceRouter)
+app.use('/api',getSeanceRouter)
+app.use('/api',ajouterExerciceRouter)
 
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur http://localhost:${PORT}`);
