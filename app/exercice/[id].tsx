@@ -1,17 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, StatusBar, TouchableOpacity, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Video, ResizeMode } from 'expo-av';
-import { exercices } from '../data/exercices';
-import { Ionicons } from '@expo/vector-icons'; // Pour l'icône de la flèche retour
+import { exercices, getExerciseImage } from '../data/exercices';
+import { Ionicons } from '@expo/vector-icons';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const ExerciceDetails = () => {
   const { id } = useLocalSearchParams();
-  const exerciceId = parseInt(id as string, 10);
-  const exercice = exercices.find(item => item.id === exerciceId);
-  const router = useRouter(); // Utilisé pour la navigation
+  const exercice = exercices.find(item => item.id === id);
+  const router = useRouter();
 
   if (!exercice) {
     return (
@@ -25,55 +23,51 @@ const ExerciceDetails = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Flèche de retour */}
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={20} color="white"  />
+        <Ionicons name="arrow-back" size={20} color="white" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>{exercice.nom}</Text>
+      <Text style={styles.title}>{exercice.name}</Text>
 
-      {/* Vidéo */}
-      <Video
-        source={exercice.video}
-        style={styles.video}
-       
-        resizeMode={ResizeMode.CONTAIN}
-        shouldPlay={true}
-        isLooping
-      />
+      {exercice.images.map((img, idx) => (
+        <Image
+          key={idx}
+          source={{ uri: getExerciseImage(img) }}
+          style={styles.image}
+          resizeMode="contain"
+        />
+      ))}
 
       <View style={styles.section}>
-        <Text style={styles.infoTitle}>🎯 Zone ciblée</Text>
-        <Text style={styles.infoText}>{exercice.cible}</Text>
+        <Text style={styles.infoTitle}>🎯 Zones ciblées</Text>
+        <Text style={styles.infoText}>{exercice.primaryMuscles.join(', ')}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.infoTitle}>💪 Secondaires</Text>
+        <Text style={styles.infoText}>
+          {exercice.secondaryMuscles.length > 0 ? exercice.secondaryMuscles.join(', ') : 'Aucune'}
+        </Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.infoTitle}>🏋️‍♂️ Équipement</Text>
-        <Text style={styles.infoText}>{exercice.equipement}</Text>
+        <Text style={styles.infoText}>{exercice.equipment}</Text>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.infoTitle}>⚙️ Préparation</Text>
-        <Text style={styles.infoText}>{exercice.preparation}</Text>
+        <Text style={styles.infoTitle}>📋 Instructions</Text>
+        {exercice.instructions.map((step, idx) => (
+          <Text key={idx} style={styles.infoText}>• {step}</Text>
+        ))}
       </View>
-
-      <View style={styles.section}>
-        <Text style={styles.infoTitle}>🚀 Exécution</Text>
-        <Text style={styles.infoText}>{exercice.execution}</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.infoTitle}>💡 Conseils clés</Text>
-        <Text style={styles.infoText}>{exercice.conseils}</Text>
-      </View>
-
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginTop:20,
+    marginTop: 20,
     backgroundColor: '#F9FAFB',
     padding: 20,
     paddingBottom: 40,
@@ -85,9 +79,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  video: {
-    width: width - 40, // Ajuste la largeur pour une meilleure présentation
-    height: height * 0.76, // Rendre la vidéo plus grande
+  image: {
+    width: width - 40,
+    height: 250,
     borderRadius: 12,
     marginBottom: 20,
     alignSelf: 'center',
@@ -134,7 +128,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 10,
     elevation: 5,
-    zIndex: 1000, // Assure que la flèche est au-dessus du contenu
+    zIndex: 1000,
   },
 });
 

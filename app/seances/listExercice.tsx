@@ -1,137 +1,58 @@
-import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-} from 'react-native';
-import { exercices } from '../data/exercices';
-import { useRouter, useLocalSearchParams, } from 'expo-router';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { exercices } from '../data/exercices'; // Make sure this file exists and exports correctly
 
-const SelectionExercice = () => {
-  const { id } = useLocalSearchParams(); // id = id de la séance
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+const ExercicesList = () => {
   const router = useRouter();
 
-  const toggleSelection = useCallback((id: number) => {
-    setSelectedId((prev) => (prev === id ? null : id));
-  }, []);
-
-  const validerSelection = async () => {
-    if (selectedId === null) {
-      Alert.alert('Erreur', 'Veuillez sélectionner un exercice.');
-      return;
-    }
-
-    try {
-      router.push({
-        pathname: '/seances/musculation',
-        params: {
-          exerciceId: selectedId.toString(),
-          id: id?.toString(), // id de la séance
-        },
-      });
-    } catch (error) {
-      Alert.alert('Erreur', 'Impossible de rediriger vers le formulaire.');
-    }
-  };
-
-  const renderItem = ({ item }: any) => (
-    <View style={[styles.item, selectedId === item.id && styles.itemSelected]}>
+  const renderExercice = ({ item }: any) => {
+    return (
       <TouchableOpacity
-        style={styles.infoContainer}
-        onPress={() => router.push(`/exercice/${item.id}`)}
+        style={styles.card}
+        onPress={() => router.push(`/exercice/${encodeURIComponent(item.id)}`)}
       >
-        <Text style={styles.itemText}>{item.nom}</Text>
-        <Text style={styles.zoneText}>Zone : {item.cible}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => toggleSelection(item.id)}>
-        <Text style={styles.checkbox}>
-          {selectedId === item.id ? '✅' : '⬜'}
+        <Text style={styles.exerciceTitle}>{item.name}</Text>
+        <Text style={styles.exerciceCible}>
+          {item.primaryMuscles?.join(', ') || 'No target'}
         </Text>
       </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Sélectionner un exercice</Text>
+    <View style={{ flex: 1 }}>
       <FlatList
         data={exercices}
+        renderItem={renderExercice}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={styles.container}
       />
-      <TouchableOpacity style={styles.button} onPress={validerSelection}>
-        <Text style={styles.buttonText}>Valider la sélection</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 };
 
-export default SelectionExercice;
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
+    marginTop: 20,
     padding: 20,
+    backgroundColor: '#f7f7f7',
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#1F2937',
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  item: {
-    backgroundColor: '#FFF',
+  card: {
+    backgroundColor: 'white',
     padding: 15,
-    marginVertical: 8,
-    marginHorizontal: 10,
+    marginBottom: 15,
     borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    elevation: 2,
+    elevation: 5,
   },
-  itemSelected: {
-    backgroundColor: '#E0F7FA',
-  },
-  infoContainer: {
-    flex: 1,
-  },
-  itemText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  zoneText: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  checkbox: {
+  exerciceTitle: {
     fontSize: 20,
-    paddingHorizontal: 10,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 10,
-    marginHorizontal: 30,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 16,
     fontWeight: 'bold',
+  },
+  exerciceCible: {
+    fontSize: 16,
+    color: '#666',
   },
 });
+
+export default ExercicesList;

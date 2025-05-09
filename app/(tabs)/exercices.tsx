@@ -14,8 +14,8 @@ const ExercicesList = () => {
           router.push(`/exercice/${item.id}`);
         }}
       >
-        <Text style={styles.exerciceTitle}>{item.nom}</Text>
-        <Text style={styles.exerciceCible}>{item.cible}</Text>
+        <Text style={styles.exerciceTitle}>{item.name}</Text>
+        <Text style={styles.exerciceCible}>{item.primaryMuscles}</Text>
       </TouchableOpacity>
     );
   };
