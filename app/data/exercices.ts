@@ -2,7 +2,13 @@
 
 const BASE_IMAGE_URL = 'http://10.0.2.2:5000/images/'; 
 
-export const getExerciseImage = (imagePath: string) => `${BASE_IMAGE_URL}${imagePath}`;
+export const getExerciseImage = (path: string): string => {
+
+   const url = `http://10.0.2.2:5000/images/${path}`; // Use your LAN IP
+  console.log("Fetching image from:", url); // Debug
+  return url ;
+};
+
 
 export const exercices = [
   {
@@ -22620,7 +22626,5 @@ export const exercices = [
     ],
     "id": "Zottman_Preacher_Curl"
   }
-]
-
-  ;
+] ;
   

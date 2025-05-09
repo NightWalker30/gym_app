@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
+
 const ExerciceDetails = () => {
   const { id } = useLocalSearchParams();
   const exercice = exercices.find(item => item.id === id);

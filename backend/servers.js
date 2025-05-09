@@ -13,7 +13,8 @@ const cors = require('cors');
 const app = express();
 const PORT = 5000;
 
-app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
 
 // Connexion à MongoDB
 connectDB();

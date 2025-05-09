@@ -1,58 +1,50 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { exercices } from "../data/exercices"; // adapte le chemin si nécessaire
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+
+const filterOptions = [
+  { label: 'By Muscle Group 💪', value: 'primaryMuscles' },
+  { label: 'By Equipment 𝄂𝄂—𝄂𝄂', value: 'equipement' },
+  { label: 'By Category', value: 'category' },
+];
 
 const ExercicesList = () => {
   const router = useRouter();
 
-  const renderExercice = ({ item }: any) => {
-    return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => {
-          router.push(`/exercice/${item.id}`);
-        }}
-      >
-        <Text style={styles.exerciceTitle}>{item.name}</Text>
-        <Text style={styles.exerciceCible}>{item.primaryMuscles}</Text>
-      </TouchableOpacity>
-    );
-  };
-
   return (
-    <View style={{ flex: 1 }}>
-      <FlatList
-        data={exercices}
-        renderItem={renderExercice}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.container}
-      />
+    <View style={styles.container}>
+      {filterOptions.map((option) => (
+        <TouchableOpacity
+          key={option.value}
+          style={styles.card}
+          onPress={() => router.push(`../../exercices/${option.value}`)}
+        >
+          <Text style={styles.title}>{option.label}</Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
 
+export default ExercicesList;
+
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
+    flex: 1,
     padding: 20,
     backgroundColor: '#f7f7f7',
+    justifyContent: 'center',
   },
   card: {
     backgroundColor: 'white',
-    padding: 15,
+    padding: 20,
     marginBottom: 15,
     borderRadius: 10,
     elevation: 5,
+    alignItems: 'center',
   },
-  exerciceTitle: {
+  title: {
     fontSize: 20,
     fontWeight: 'bold',
   },
-  exerciceCible: {
-    fontSize: 16,
-    color: '#666',
-  },
 });
-
-export default ExercicesList;
