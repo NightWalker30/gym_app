@@ -8,6 +8,8 @@ const profileRoute = require('./routes/getProfile');
 const seanceRouter = require('./routes/seance');
 const getSeanceRouter = require('./routes/getSeance');
 const ajouterExerciceRouter = require('./routes/ajouterExercieRouter');
+const workoutRoutes = require('./routes/workout');
+
 const cors = require('cors');
 
 const app = express();
@@ -37,7 +39,12 @@ app.use('/api', profileRoute);
 app.use('/api', seanceRouter);
 app.use('/api', getSeanceRouter);
 app.use('/api', ajouterExerciceRouter);
+app.use('/api/workouts', workoutRoutes);
+
 app.use('/api', require('./routes/exercises'));  // Your exercise route here
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur http://localhost:${PORT}`);

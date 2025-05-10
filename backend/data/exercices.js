@@ -1,4 +1,8 @@
-[
+// app/data/exercices.ts
+
+
+
+ const exercices = [
   {
     "name": "3/4 Sit-Up",
     "force": "pull",
@@ -22614,4 +22618,5 @@
     ],
     "id": "Zottman_Preacher_Curl"
   }
-]
+] ;
+  module.exports = { exercices };
