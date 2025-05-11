@@ -9,6 +9,10 @@ const seanceRouter = require('./routes/seance');
 const getSeanceRouter = require('./routes/getSeance');
 const ajouterExerciceRouter = require('./routes/ajouterExercieRouter');
 const workoutRoutes = require('./routes/workout');
+const statisticsRoute = require('./routes/statistics');
+
+
+
 
 const cors = require('cors');
 
@@ -25,13 +29,6 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-// Routes de test
-app.post('/karim', (req, res) => {
-  res.json({ message: 'Hello bro, how are you karm?' });
-});
-app.get('/person', (req, res) => {
-  res.json({ message: 'Hello bro, how are you?' });
-});
 
 app.use('/api', authRoute);
 app.use('/api', signUpRoute);
@@ -40,6 +37,8 @@ app.use('/api', seanceRouter);
 app.use('/api', getSeanceRouter);
 app.use('/api', ajouterExerciceRouter);
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/statistics', statisticsRoute);
+
 
 app.use('/api', require('./routes/exercises'));  // Your exercise route here
 

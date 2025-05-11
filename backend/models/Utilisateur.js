@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true, // L'email doit être unique dans la base de données
+    unique: true,
   },
   pay: {
     type: String,
@@ -31,7 +31,24 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { timestamps: true }); // Ajoute les champs `createdAt` et `updatedAt`
+  sexe: {
+    type: String,
+    enum: ['homme', 'femme'],
+    required: true,
+  },
+  poids: {
+    type: Number, // en kilogrammes
+    required: true,
+  },
+  taille: {
+    type: Number, // en centimètres
+    required: true,
+  },
+  niveau_activite: {
+    type: String,
+    enum: ['faible', 'modere', 'eleve'],
+    default: 'modere',
+  }
+}, { timestamps: true });
 
-// Création du modèle à partir du schéma
 module.exports = mongoose.model('Utilisateur', UserSchema);

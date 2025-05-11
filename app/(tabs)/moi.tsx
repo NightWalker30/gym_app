@@ -92,7 +92,36 @@ const Moi = () => {
           <Text style={styles.value}>{age} ans</Text>
         </View>
 
-        {/* Bouton vers outils */}
+        {/* New Fitness Data */}
+        {profileData.poids && (
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Poids :</Text>
+            <Text style={styles.value}>{profileData.poids} kg</Text>
+          </View>
+        )}
+
+        {profileData.taille && (
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Taille :</Text>
+            <Text style={styles.value}>{profileData.taille} cm</Text>
+          </View>
+        )}
+
+        {profileData.sexe && (
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Sexe :</Text>
+            <Text style={styles.value}>{profileData.sexe}</Text>
+          </View>
+        )}
+
+        {profileData.objectif && (
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Objectif :</Text>
+            <Text style={styles.value}>{profileData.objectif}</Text>
+          </View>
+        )}
+
+        {/* Tools button */}
         <View style={styles.buttonContainer}>
           <Text style={styles.button} onPress={() => router.push('/seances/outils')}>
             Voir les outils de salle d'entraînement
