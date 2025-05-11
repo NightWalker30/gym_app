@@ -34,15 +34,15 @@ const UserSchema = new mongoose.Schema({
   sexe: {
     type: String,
     enum: ['homme', 'femme'],
-    required: true,
+    required: false,
   },
   poids: {
     type: Number, // en kilogrammes
-    required: true,
+    required: false,
   },
   taille: {
     type: Number, // en centimètres
-    required: true,
+    required: false,
   },
   niveau_activite: {
     type: String,
