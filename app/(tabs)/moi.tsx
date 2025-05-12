@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from '../../outils/axios';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const calculerAge = (dateNaissance: string): number => {
   const naissance = new Date(dateNaissance);
@@ -26,8 +28,6 @@ const Moi = () => {
     const loadProfile = async () => {
       try {
         const token = await AsyncStorage.getItem('userToken');
-        console.log("this is the token");
-        console.log(token);
         if (!token) {
           setError('Token manquant, veuillez vous reconnecter.');
           return;
@@ -39,7 +39,6 @@ const Moi = () => {
           },
         });
         
-
         setProfileData(response.data.profile);
       } catch (err: any) {
         console.log(err);
@@ -50,6 +49,12 @@ const Moi = () => {
 
     loadProfile();
   }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('userToken');
+    await AsyncStorage.removeItem('userId');
+    router.replace("/auth/login");
+  };
 
   if (error) {
     return (
@@ -62,7 +67,12 @@ const Moi = () => {
   if (!profileData) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.text}>Chargement...</Text>
+        <LinearGradient
+          colors={['#6a11cb', '#2575fc']}
+          style={styles.loadingContainer}
+        >
+          <Text style={styles.loadingText}>Chargement du profil...</Text>
+        </LinearGradient>
       </SafeAreaView>
     );
   }
@@ -71,66 +81,103 @@ const Moi = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} style={styles.avatar} />
+      <LinearGradient
+        colors={['#6a11cb', '#2575fc']}
+        style={styles.header}
+      >
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <MaterialIcons name="logout" size={24} color="white" />
+        </TouchableOpacity>
+        
+        <Image 
+          source={{ uri: profileData.photo || 'https://i.pravatar.cc/150?img=12' }} 
+          style={styles.avatar} 
+        />
         <Text style={styles.name}>{profileData.prenom} {profileData.nom}</Text>
         <Text style={styles.email}>{profileData.email}</Text>
+      </LinearGradient>
 
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Ville :</Text>
-          <Text style={styles.value}>{profileData.ville}</Text>
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Pays :</Text>
-          <Text style={styles.value}>{profileData.pay}</Text>
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Date de naissance :</Text>
-          <Text style={styles.value}>{new Date(profileData.date_naissance).toLocaleDateString()}</Text>
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Âge :</Text>
-          <Text style={styles.value}>{age} ans</Text>
-        </View>
-
-        {/* New Fitness Data */}
-        {profileData.poids && (
-          <View style={styles.infoBox}>
-            <Text style={styles.label}>Poids :</Text>
-            <Text style={styles.value}>{profileData.poids} kg</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.card}>
+          <View style={styles.infoRow}>
+            <MaterialIcons name="location-on" size={20} color="#6a11cb" />
+            <View style={styles.infoText}>
+              <Text style={styles.label}>Localisation</Text>
+              <Text style={styles.value}>{profileData.ville}, {profileData.pay}</Text>
+            </View>
           </View>
-        )}
 
-        {profileData.taille && (
-          <View style={styles.infoBox}>
-            <Text style={styles.label}>Taille :</Text>
-            <Text style={styles.value}>{profileData.taille} cm</Text>
-          </View>
-        )}
+          <View style={styles.divider} />
 
-        {profileData.sexe && (
-          <View style={styles.infoBox}>
-            <Text style={styles.label}>Sexe :</Text>
-            <Text style={styles.value}>{profileData.sexe}</Text>
+          <View style={styles.infoRow}>
+            <MaterialIcons name="cake" size={20} color="#6a11cb" />
+            <View style={styles.infoText}>
+              <Text style={styles.label}>Date de naissance</Text>
+              <Text style={styles.value}>{new Date(profileData.date_naissance).toLocaleDateString()} ({age} ans)</Text>
+            </View>
           </View>
-        )}
+        </View>
+
+        {profileData.poids || profileData.taille || profileData.sexe ? (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Informations Physiques</Text>
+            
+            {profileData.poids && (
+              <View style={styles.infoRow}>
+                <MaterialIcons name="fitness-center" size={20} color="#6a11cb" />
+                <View style={styles.infoText}>
+                  <Text style={styles.label}>Poids</Text>
+                  <Text style={styles.value}>{profileData.poids} kg</Text>
+                </View>
+              </View>
+            )}
+
+            {profileData.taille && (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="straighten" size={20} color="#6a11cb" />
+                  <View style={styles.infoText}>
+                    <Text style={styles.label}>Taille</Text>
+                    <Text style={styles.value}>{profileData.taille} cm</Text>
+                  </View>
+                </View>
+              </>
+            )}
+
+            {profileData.sexe && (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="person" size={20} color="#6a11cb" />
+                  <View style={styles.infoText}>
+                    <Text style={styles.label}>Sexe</Text>
+                    <Text style={styles.value}>{profileData.sexe}</Text>
+                  </View>
+                </View>
+              </>
+            )}
+          </View>
+        ) : null}
 
         {profileData.objectif && (
-          <View style={styles.infoBox}>
-            <Text style={styles.label}>Objectif :</Text>
-            <Text style={styles.value}>{profileData.objectif}</Text>
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Objectif</Text>
+            <View style={styles.infoRow}>
+              <MaterialIcons name="flag" size={20} color="#6a11cb" />
+              <View style={styles.infoText}>
+                <Text style={styles.value}>{profileData.objectif}</Text>
+              </View>
+            </View>
           </View>
         )}
 
-        {/* Tools button */}
-        <View style={styles.buttonContainer}>
-          <Text style={styles.button} onPress={() => router.push('/seances/outils')}>
-            Voir les outils de salle d'entraînement
-          </Text>
-        </View>
+        <TouchableOpacity 
+          style={styles.editButton}
+          onPress={() => router.push('../profile/edit')}
+        >
+          <Text style={styles.editButtonText}>Modifier le profil</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -141,68 +188,114 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
-  scrollContainer: {
-    alignItems: 'center',
+  header: {
+    padding: 20,
     paddingTop: 50,
-    paddingBottom: 30,
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 18,
+  },
+  logoutButton: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    padding: 10,
   },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginBottom: 20,
+    borderWidth: 3,
+    borderColor: 'white',
+    marginBottom: 15,
   },
   name: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 5,
   },
   email: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
+    color: 'rgba(255,255,255,0.8)',
+    marginBottom: 10,
   },
-  infoBox: {
-    width: '90%',
-    backgroundColor: '#fff',
-    padding: 15,
+  scrollContainer: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginVertical: 5,
-    borderRadius: 10,
-    elevation: 2,
+  },
+  infoText: {
+    marginLeft: 15,
   },
   label: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: 12,
+    color: '#888',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   value: {
     fontSize: 16,
-    fontWeight: '500',
+    color: '#333',
+    marginTop: 3,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 15,
+  },
+  editButton: {
+    backgroundColor: '#6a11cb',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  editButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   error: {
     color: 'red',
     fontSize: 18,
     textAlign: 'center',
     margin: 20,
-  },
-  text: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  buttonContainer: {
-    marginTop: 20,
-    width: '90%',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    color: '#fff',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    overflow: 'hidden',
   },
 });
 
