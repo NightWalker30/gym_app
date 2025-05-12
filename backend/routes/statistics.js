@@ -19,6 +19,7 @@ const calculateCalories = (exercise, weight, gender) => {
 
 // 🛡 Apply authentication middleware
 router.get('/', authenticate, async (req, res) => {
+  console.log("we re in statistics");
   try {
     const { startDate, endDate, exerciseType } = req.query;
     const user = await User.findById(req.user.userId); // now this will work

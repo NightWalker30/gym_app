@@ -37,8 +37,10 @@ const Statistics = () => {
   const [showEndCalendar, setShowEndCalendar] = useState(false);
 
   useEffect(() => {
+
     const loadStatistics = async () => {
       setIsLoading(true);
+
       try {
         const token = await AsyncStorage.getItem('userToken');
         if (!token) {

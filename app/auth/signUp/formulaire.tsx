@@ -13,6 +13,8 @@ import { useRouter } from "expo-router";
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "../../../outils/axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const Formulaire = () => {
     const [prenom, setPrenom] = useState("");
@@ -84,9 +86,18 @@ const Formulaire = () => {
                 password
             });
 
-            if (response.data.success) {
-                Alert.alert('Bravo, inscription réussie !');
-                router.push("/auth/login");
+   
+    const { userId, token } = response.data;
+
+    if (userId && token) {
+      console.log('UserId:', userId);
+      console.log('Token:', token);
+
+      await AsyncStorage.setItem('userId', userId);
+      await AsyncStorage.setItem('userToken', token);
+
+  router.replace("../signUp/CompleteProfile"); // ✅ Go to home screen directly
+
             } else {
                 Alert.alert('Un champ incorrect.');
             }

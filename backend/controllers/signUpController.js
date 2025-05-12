@@ -1,39 +1,56 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Utilisateur = require('../models/Utilisateur');
 
-// Enregistrement d'un nouvel utilisateur
 exports.signUp = async (req, res) => {
   const { prenom, nom, date_naissance, ville, email, pay, password } = req.body;
-  console.log('Données reçues:', req.body);
+
+  // Basic validation for required fields
+  if (!prenom || !nom || !date_naissance || !ville || !email || !pay || !password) {
+    return res.status(400).json({ message: 'Tous les champs sont requis' });
+  }
 
   try {
-    // Vérifier si l'email est déjà utilisé
+    // Vérifier si l'email existe déjà
     const existingUser = await Utilisateur.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    // Hacher le mot de passe avant de le stocker
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 salt rounds
+    // Hacher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Créer un nouvel utilisateur avec le mot de passe haché et la date de naissance
+    // Créer un nouvel utilisateur
     const utilisateur = new Utilisateur({
       prenom,
       nom,
-      date_naissance,  // Utiliser la date de naissance au lieu de l'âge
+      date_naissance,
       ville,
       email,
       pay,
-      password: hashedPassword, // Utiliser le mot de passe haché
+      password: hashedPassword,
     });
 
+    // Sauvegarder l'utilisateur dans la base de données
     await utilisateur.save();
 
-    // Répondre avec un message de succès
-    res.status(201).json({ message: 'Utilisateur créé avec succès', success: true });
+    // ✅ Créer un token JWT après enregistrement
+  const token = jwt.sign(
+      { userId: utilisateur._id, email: utilisateur.email }, // Payload avec les informations de l'utilisateur
+      process.env.JWT_SECRET,                  // Clé secrète pour signer le token
+      { expiresIn: '1h' }                     // Durée d'expiration du token (1 heure dans cet exemple)
+    );
+
+    // Répondre avec le message de succès et le token
+    res.status(201).json({
+      message: 'Utilisateur créé avec succès',
+      success: true,
+      token,  // Retourner le token pour l'authentification future
+      userId: utilisateur._id,  // Retourner l'ID de l'utilisateur
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur lors de la création de l\'utilisateur' });
+    console.error('Erreur lors de la création de l\'utilisateur:', error);
+    res.status(500).json({ message: 'Erreur lors de la création de l\'utilisateur', error: error.message });
   }
 };

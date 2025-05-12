@@ -26,6 +26,8 @@ const Moi = () => {
     const loadProfile = async () => {
       try {
         const token = await AsyncStorage.getItem('userToken');
+        console.log("this is the token");
+        console.log(token);
         if (!token) {
           setError('Token manquant, veuillez vous reconnecter.');
           return;
@@ -36,9 +38,11 @@ const Moi = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        
 
         setProfileData(response.data.profile);
       } catch (err: any) {
+        console.log(err);
         setError('Erreur de chargement du profil');
         console.error(err);
       }
