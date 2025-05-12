@@ -3,10 +3,10 @@ const jwt = require('jsonwebtoken');
 const Utilisateur = require('../models/Utilisateur');
 
 exports.signUp = async (req, res) => {
-  const { prenom, nom, date_naissance, ville, email, pay, password } = req.body;
+  const { prenom, nom, date_naissance, email, pay, password } = req.body;
 
   // Basic validation for required fields
-  if (!prenom || !nom || !date_naissance || !ville || !email || !pay || !password) {
+  if (!prenom || !nom || !date_naissance || !email || !pay || !password) {
     return res.status(400).json({ message: 'Tous les champs sont requis' });
   }
 
@@ -25,7 +25,6 @@ exports.signUp = async (req, res) => {
       prenom,
       nom,
       date_naissance,
-      ville,
       email,
       pay,
       password: hashedPassword,

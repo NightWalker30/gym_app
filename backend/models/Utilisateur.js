@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   },
   ville: {
     type: String,
-    required: true,
+    required: false,
   },
   email: {
     type: String,
