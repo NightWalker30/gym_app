@@ -2,57 +2,63 @@ const express = require('express');
 const router = express.Router();
 const Workout = require('../models/Workout');
 const User = require('../models/Utilisateur');
-const authenticate = require('../Midellware/authMiddleware'); // ⬅️ import middleware
+const authenticate = require('../Midellware/authMiddleware');
 
-// Calculate calories
-const calculateCalories = (exercise, weight, gender) => {
-  let MET = exercise.met || 5;
-  let duration = exercise.duration || 30;
-  let caloriesBurned = ((MET * 3.5 * weight) / 200) * duration;
+// 🔥 Updated calorie calculator
+const calculateCalories = (workout, weight, gender) => {
+  let calories = 0;
 
-  if (gender === 'female') {
-    caloriesBurned *= 0.85;
+  if (workout.type === 'strength' && Array.isArray(workout.exercises)) {
+    // Calculate based on each exercise
+    workout.exercises.forEach(ex => {
+      const MET = ex.met || 5;
+      const duration = ex.duration || 10;
+      let exCalories = ((MET * 3.5 * weight) / 200) * duration;
+      if (gender === 'female') exCalories *= 0.85;
+      calories += exCalories;
+    });
+  } else if (workout.type === 'cardio' || workout.type === 'yoga') {
+    const MET = workout.type === 'cardio' ? 6 : 3; // Avg MET values
+    const duration = workout.duration || 30;
+    calories = ((MET * 3.5 * weight) / 200) * duration;
+    if (gender === 'female') calories *= 0.85;
   }
 
-  return caloriesBurned;
+  return calories;
 };
 
-// 🛡 Apply authentication middleware
+// 📊 Stats endpoint
 router.get('/', authenticate, async (req, res) => {
-  console.log("we re in statistics");
   try {
     const { startDate, endDate, exerciseType } = req.query;
-    const user = await User.findById(req.user.userId); // now this will work
+    const user = await User.findById(req.user.userId);
 
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé.' });
     }
 
-    let query = { userId: req.user.userId };
-
-    if (startDate && endDate) {
-      query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    }
-
-    if (exerciseType) {
-      query['exercises.type'] = exerciseType;
-    }
+    let query = {
+      userId: req.user.userId,
+      status: 'completed',
+      ...(startDate && endDate && {
+        completedDate: { $gte: new Date(startDate), $lte: new Date(endDate) }
+      }),
+      ...(exerciseType && { type: exerciseType })
+    };
 
     const workouts = await Workout.find(query);
-
     let totalCalories = 0;
+
     workouts.forEach(workout => {
-      workout.exercises.forEach(exercise => {
-        const calories = calculateCalories(exercise, user.poids || 70, user.sexe || 'male');
-        totalCalories += calories;
-      });
+      totalCalories += calculateCalories(workout, user.poids || 70, user.sexe || 'male');
     });
 
     res.status(200).json({
       workouts,
       totalCalories,
-      workoutCount: workouts.length,
+      workoutCount: workouts.length
     });
+
   } catch (error) {
     console.error('Error fetching statistics:', error);
     res.status(500).json({ message: 'Erreur serveur.' });

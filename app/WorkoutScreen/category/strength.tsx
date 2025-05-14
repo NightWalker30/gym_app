@@ -117,6 +117,7 @@ const handleCreateWorkout = async () => {
       name: workoutName,
       exerciseNames: selectedExercises.map(ex => ex.name),
       notes,
+      status :"template",
     }, {
       headers: {
         Authorization: `Bearer ${token}`,

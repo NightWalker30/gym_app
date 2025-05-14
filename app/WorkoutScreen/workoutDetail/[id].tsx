@@ -2,6 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import  axios  from '../../../outils/axios'
+type WorkoutStatus = 'template' | 'planned' | 'logged';
+
+interface Workout {
+  name: string;
+  type: WorkoutStatus;
+  plannedDate?: string; // ISO string
+  completedDate?: string; // ISO string
+  
+}
+
 
 const WorkoutDetails = () => {
   const { id } = useLocalSearchParams(); // Get workout ID from the URL parameters
@@ -13,6 +24,7 @@ const WorkoutDetails = () => {
   // Fetch workout data from backend API
   useEffect(() => {
     const fetchWorkoutData = async () => {
+     
       try {
         const response = await fetch(`http://10.0.2.2:5000/api/workouts/${id}`); 
         const data = await response.json();
@@ -98,6 +110,63 @@ const WorkoutDetails = () => {
         <Text style={styles.infoTitle}>📅 Duration</Text>
         <Text style={styles.infoText}>{workout.duration} minutes</Text>
       </View>
+
+      {/* Status Section */}
+<View style={styles.section}>
+  <Text style={styles.infoTitle}>📌 Status</Text>
+
+  {workout.status === 'template' && (
+    <>
+      <Text style={styles.infoText}>This is a workout template.</Text>
+
+      {/* 📅 Plan it */}
+      <TouchableOpacity
+        style={styles.actionButton}
+        onPress={() => router.push(`../plan/${id}`)} // Correct absolute path
+      >
+        <Text style={styles.actionButtonText}>📅 Plan it</Text>
+      </TouchableOpacity>
+
+      {/* 🚀 Do it now */}
+      <TouchableOpacity
+        style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
+        onPress={async () => {
+          try {
+            const response = await axios.post(
+              `workouts/start/${workout._id}`
+            );
+            const startedWorkout = response.data;
+          } catch (error) {
+            console.error('Failed to start workout:', (error as any).message);
+          }
+        }}
+      >
+        <Text style={styles.actionButtonText}>🚀 Do it now</Text>
+      </TouchableOpacity>
+    </>
+  )}
+
+  {workout.status === 'planned' && (
+    <>
+      <Text style={styles.infoText}>
+        Planned for: {new Date(workout.plannedDate).toLocaleString()}
+      </Text>
+      <TouchableOpacity
+        style={styles.actionButton}
+        onPress={() => router.push(`../plan/${id}`)}
+      >
+        <Text style={styles.actionButtonText}>✏️ Change Planned Time</Text>
+      </TouchableOpacity>
+    </>
+  )}
+
+  {workout.status === 'completed' && (
+    <Text style={styles.infoText}>
+      ✅ Completed on: {new Date(workout.completedDate).toLocaleString()}
+    </Text>
+  )}
+</View>
+
     </ScrollView>
   );
 };
@@ -169,6 +238,19 @@ const styles = StyleSheet.create({
     padding: 12,
     elevation: 5,
   },
+  actionButton: {
+  marginTop: 10,
+  backgroundColor: '#3182CE',
+  padding: 12,
+  borderRadius: 10,
+  alignItems: 'center',
+},
+actionButtonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: '600',
+},
+
 });
 
 export default WorkoutDetails;

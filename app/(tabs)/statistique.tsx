@@ -1,13 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView, 
-  TextInput, 
-  ActivityIndicator,
-  TouchableOpacity 
+  View, Text, StyleSheet, SafeAreaView, ScrollView, 
+  ActivityIndicator, TouchableOpacity 
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
@@ -15,7 +9,6 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from '../../outils/axios';
 import { Calendar } from 'react-native-calendars';
-
 
 type Day = {
   dateString: string;
@@ -26,47 +19,54 @@ type Day = {
 
 const Statistics = () => {
   const [workouts, setWorkouts] = useState<any[]>([]);
-  const [totalCalories, setTotalCalories] = useState<number>(0);
-  const [workoutCount, setWorkoutCount] = useState<number>(0);
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [exerciseType, setExerciseType] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [totalCalories, setTotalCalories] = useState(0);
+  const [workoutCount, setWorkoutCount] = useState(0);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [exerciseType, setExerciseType] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
 
-  useEffect(() => {
+  const calendarTheme = {
+    calendarBackground: '#fff',
+    todayTextColor: '#6c5ce7',
+    arrowColor: '#6c5ce7',
+    monthTextColor: '#2d3436',
+    textDayFontWeight: '300',
+    textMonthFontWeight: 'bold',
+    textDayHeaderFontWeight: '300',
+  };
 
-    const loadStatistics = async () => {
-      setIsLoading(true);
-
-      try {
-        const token = await AsyncStorage.getItem('userToken');
-        if (!token) {
-          setError('Authentication required. Please login again.');
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await axios.get('/statistics', {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { startDate, endDate, exerciseType },
-        });
-
-        setWorkouts(response.data.workouts);
-        setTotalCalories(response.data.totalCalories);
-        setWorkoutCount(response.data.workoutCount);
-        setIsLoading(false);
-      } catch (err: any) {
-        setError('Failed to load statistics. Please try again.');
-        setIsLoading(false);
-        console.error(err);
+  const fetchStatistics = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        setError('Authentication required. Please login again.');
+        return;
       }
-    };
 
-    loadStatistics();
+      const response = await axios.get('/statistics', {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { startDate, endDate, exerciseType },
+      });
+
+      setWorkouts(response.data.workouts);
+      setTotalCalories(response.data.totalCalories);
+      setWorkoutCount(response.data.workoutCount);
+    } catch (err: any) {
+      setError('Failed to load statistics. Please try again.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [startDate, endDate, exerciseType]);
+
+  useEffect(() => {
+    fetchStatistics();
+  }, [fetchStatistics]);
 
   const handleDateSelect = (date: string, type: 'start' | 'end') => {
     if (type === 'start') {
@@ -78,12 +78,37 @@ const Statistics = () => {
     }
   };
 
+const groupWorkoutsByDay = (workouts: any[]) => {
+  const grouped: Record<string, { workouts: any[]; totalCalories: number; totalTime: number }> = {};
+
+  workouts.forEach((workout) => {
+    const date = new Date(workout.completedDate).toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+    if (!grouped[date]) {
+      grouped[date] = {
+        workouts: [],
+        totalCalories: 0,
+        totalTime: 0,
+      };
+    }
+
+    grouped[date].workouts.push(workout);
+    grouped[date].totalCalories += workout.caloriesBurned || 0;
+    grouped[date].totalTime += workout.duration || 0; // Assuming duration is in minutes
+  });
+
+  // Convert to array and sort by date (descending)
+  return Object.entries(grouped)
+    .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+    .map(([date, data]) => ({ date, ...data }));
+};
+
+   const groupedWorkouts = groupWorkoutsByDay(workouts);
+
+
   if (isLoading) {
     return (
-      <LinearGradient 
-        colors={['#f5f7fa', '#c3cfe2']} 
-        style={styles.loadingContainer}
-      >
+      <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6c5ce7" />
         <Text style={styles.loadingText}>Crunching your numbers...</Text>
       </LinearGradient>
@@ -92,17 +117,14 @@ const Statistics = () => {
 
   if (error) {
     return (
-      <LinearGradient 
-        colors={['#f5f7fa', '#c3cfe2']} 
-        style={styles.container}
-      >
+      <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={styles.container}>
         <View style={styles.errorCard}>
           <MaterialIcons name="error-outline" size={48} color="#d63031" />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
-            style={styles.retryButton}
-            onPress={() => setError(null)}
-          >
+          <TouchableOpacity style={styles.retryButton} onPress={() => {
+            setError(null);
+            fetchStatistics();
+          }}>
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
@@ -111,10 +133,7 @@ const Statistics = () => {
   }
 
   return (
-    <LinearGradient 
-      colors={['#f5f7fa', '#c3cfe2']} 
-      style={styles.container}
-    >
+    <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Header */}
@@ -123,27 +142,22 @@ const Statistics = () => {
             <FontAwesome5 name="chart-line" size={24} color="#6c5ce7" />
           </View>
 
-          {/* Filters Section */}
+          {/* Filters */}
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Filter Results</Text>
-            
+
+            {/* Date Range Picker */}
             <View style={styles.dateInputContainer}>
-              <TouchableOpacity 
-                style={styles.dateInput}
-                onPress={() => setShowStartCalendar(true)}
-              >
+              <TouchableOpacity style={styles.dateInput} onPress={() => setShowStartCalendar(true)}>
                 <Text style={startDate ? styles.dateText : styles.placeholderText}>
                   {startDate || 'Start Date'}
                 </Text>
                 <MaterialIcons name="date-range" size={20} color="#6c5ce7" />
               </TouchableOpacity>
-              
+
               <Text style={styles.dateSeparator}>to</Text>
-              
-              <TouchableOpacity 
-                style={styles.dateInput}
-                onPress={() => setShowEndCalendar(true)}
-              >
+
+              <TouchableOpacity style={styles.dateInput} onPress={() => setShowEndCalendar(true)}>
                 <Text style={endDate ? styles.dateText : styles.placeholderText}>
                   {endDate || 'End Date'}
                 </Text>
@@ -154,19 +168,9 @@ const Statistics = () => {
             {showStartCalendar && (
               <View style={styles.calendarContainer}>
                 <Calendar
-                  onDayPress={(day : Day) => handleDateSelect(day.dateString, 'start')}
-                  markedDates={{
-                    [startDate]: {selected: true, selectedColor: '#6c5ce7'}
-                  }}
-                  theme={{
-                    calendarBackground: '#fff',
-                    todayTextColor: '#6c5ce7',
-                    arrowColor: '#6c5ce7',
-                    monthTextColor: '#2d3436',
-                    textDayFontWeight: '300',
-                    textMonthFontWeight: 'bold',
-                    textDayHeaderFontWeight: '300',
-                  }}
+                  onDayPress={(day: Day) => handleDateSelect(day.dateString, 'start')}
+                  markedDates={{ [startDate]: { selected: true, selectedColor: '#6c5ce7' } }}
+                  theme={calendarTheme}
                 />
               </View>
             )}
@@ -174,19 +178,9 @@ const Statistics = () => {
             {showEndCalendar && (
               <View style={styles.calendarContainer}>
                 <Calendar
-                  onDayPress={(day : Day) => handleDateSelect(day.dateString, 'end')}
-                  markedDates={{
-                    [endDate]: {selected: true, selectedColor: '#6c5ce7'}
-                  }}
-                  theme={{
-                    calendarBackground: '#fff',
-                    todayTextColor: '#6c5ce7',
-                    arrowColor: '#6c5ce7',
-                    monthTextColor: '#2d3436',
-                    textDayFontWeight: '300',
-                    textMonthFontWeight: 'bold',
-                    textDayHeaderFontWeight: '300',
-                  }}
+                  onDayPress={(day: Day) => handleDateSelect(day.dateString, 'end')}
+                  markedDates={{ [endDate]: { selected: true, selectedColor: '#6c5ce7' } }}
+                  theme={calendarTheme}
                 />
               </View>
             )}
@@ -199,22 +193,22 @@ const Statistics = () => {
                 dropdownIconColor="#6c5ce7"
               >
                 <Picker.Item label="All Exercise Types" value="" />
-                <Picker.Item label="Cardio" value="Cardio" />
-                <Picker.Item label="Strength Training" value="Strength" />
-                <Picker.Item label="Yoga" value="Yoga" />
+                <Picker.Item label="Cardio" value="cardio" />
+                <Picker.Item label="Strength Training" value="strength" />
+                <Picker.Item label="Yoga" value="yoga" />
                 <Picker.Item label="HIIT" value="HIIT" />
               </Picker>
             </View>
           </View>
 
-          {/* Summary Cards */}
+          {/* Summary */}
           <View style={styles.summaryContainer}>
             <View style={[styles.summaryCard, { backgroundColor: '#a29bfe' }]}>
               <Ionicons name="flame" size={28} color="#fff" />
               <Text style={styles.summaryNumber}>{totalCalories.toFixed(0)}</Text>
               <Text style={styles.summaryLabel}>CALORIES BURNED</Text>
             </View>
-            
+
             <View style={[styles.summaryCard, { backgroundColor: '#74b9ff' }]}>
               <FontAwesome5 name="dumbbell" size={24} color="#fff" />
               <Text style={styles.summaryNumber}>{workoutCount}</Text>
@@ -222,55 +216,36 @@ const Statistics = () => {
             </View>
           </View>
 
-          {/* Workout History */}
+          {/* History */}
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Workout History</Text>
-            
-            {workouts.length > 0 ? (
-              workouts.map((workout, index) => (
-                <View key={index} style={styles.workoutCard}>
-                  <View style={styles.workoutHeader}>
-                    <Text style={styles.workoutDate}>
-                      {new Date(workout.date).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </Text>
-                    <View style={[
-                      styles.workoutTypeBadge,
-                      workout.type === 'Cardio' && { backgroundColor: '#00b894' },
-                      workout.type === 'Strength' && { backgroundColor: '#0984e3' },
-                      workout.type === 'Yoga' && { backgroundColor: '#e84393' },
-                    ]}>
-                      <Text style={styles.workoutTypeText}>{workout.type}</Text>
-                    </View>
-                  </View>
-                  
-                  <View style={styles.workoutStats}>
-                    <View style={styles.statItem}>
-                      <Ionicons name="flame-outline" size={16} color="#636e72" />
-                      <Text style={styles.statText}>
-                        {workout.caloriesBurned.toFixed(0)} kcal
-                      </Text>
-                    </View>
-                    
-                    {workout.duration && (
-                      <View style={styles.statItem}>
-                        <Ionicons name="time-outline" size={16} color="#636e72" />
-                        <Text style={styles.statText}>{workout.duration} min</Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <MaterialIcons name="fitness-center" size={48} color="#dfe6e9" />
-                <Text style={styles.emptyText}>No workouts recorded</Text>
-                <Text style={styles.emptySubtext}>Start training to see your stats</Text>
-              </View>
-            )}
+         {groupedWorkouts.length > 0 ? (
+  groupedWorkouts.map((group, index) => (
+    <View key={index} style={styles.workoutCard}>
+      <View style={styles.workoutHeader}>
+        <Text style={styles.workoutDate}>
+          {new Date(group.date).toLocaleDateString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </Text>
+        <View style={[styles.workoutTypeBadge]}>
+          <Text style={styles.workoutTypeText}>
+            {group.totalCalories.toFixed(0)} kcal | {group.totalTime} min
+          </Text>
+        </View>
+      </View>
+    </View>
+  ))
+) : (
+  <View style={styles.emptyState}>
+    <MaterialIcons name="fitness-center" size={48} color="#dfe6e9" />
+    <Text style={styles.emptyText}>No workouts recorded</Text>
+    <Text style={styles.emptySubtext}>Start training to see your stats</Text>
+  </View>
+)}
+
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -418,16 +393,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2d3436',
   },
-  workoutTypeBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  workoutTypeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
+
   workoutStats: {
     flexDirection: 'row',
   },
@@ -483,6 +449,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  workoutTypeBadge: {
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 20,
+  backgroundColor: '#6c5ce7', // Color for the badge
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+workoutTypeText: {
+  color: '#fff',
+  fontSize: 14,
+  fontWeight: 'bold',
+},
+
 });
 
 export default Statistics;
