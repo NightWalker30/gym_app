@@ -52,6 +52,7 @@ const Home = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUpcomingWorkouts(workoutRes.data.slice(0, 2)); // Only next 2
+ 
       } catch (error) {
         console.error('Erreur de chargement:', error);
       }

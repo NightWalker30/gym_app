@@ -9,12 +9,15 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from '../../outils/axios';
 import { Calendar } from 'react-native-calendars';
+import { useRouter } from 'expo-router';
+import { Button } from 'react-native';
+
 
 type Day = {
   dateString: string;
   day: number;
   month: number;
-  year: number;
+  year: number; 
 };
 
 const Statistics = () => {
@@ -28,6 +31,7 @@ const Statistics = () => {
   const [error, setError] = useState<string | null>(null);
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
+  const router = useRouter();
 
   const calendarTheme = {
     calendarBackground: '#fff',
@@ -215,6 +219,31 @@ const groupWorkoutsByDay = (workouts: any[]) => {
               <Text style={styles.summaryLabel}>WORKOUTS</Text>
             </View>
           </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 16 }}>
+  <TouchableOpacity
+    onPress={() => router.push('/StatsScreen/progress')}
+    style={{
+      backgroundColor: '#6c5ce7',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 12,
+    }}
+  >
+    <Text style={{ color: '#fff', fontWeight: 'bold' }}>📊 Charts</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    onPress={() => router.push('/StatsScreen/Streak')}
+    style={{
+      backgroundColor: '#00b894',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 12,
+    }}
+  >
+    <Text style={{ color: '#fff', fontWeight: 'bold' }}>🔥 Streak Tracker</Text>
+  </TouchableOpacity>
+</View>
 
           {/* History */}
           <View style={styles.sectionContainer}>
