@@ -174,7 +174,7 @@ const Moi = () => {
 
         <TouchableOpacity 
           style={styles.editButton}
-          onPress={() => router.push('../profile/edit')}
+          onPress={() => router.push('../ProfileScreen/updateUser')}
         >
           <Text style={styles.editButtonText}>Modifier le profil</Text>
         </TouchableOpacity>
@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    paddingTop: 50,
-    alignItems: 'center',
+ paddingTop: 70 ,
+     alignItems: 'center',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     shadowColor: '#000',
@@ -209,12 +209,14 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
   },
-  logoutButton: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    padding: 10,
-  },
+ logoutButton: {
+  position: 'absolute',
+  top: 50, // was 15
+  right: 15,
+  padding: 10,
+  zIndex: 10,
+},
+
   avatar: {
     width: 120,
     height: 120,
