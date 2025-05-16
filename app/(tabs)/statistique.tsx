@@ -11,6 +11,8 @@ import axios from '../../outils/axios';
 import { Calendar } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
 import { Button } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+
 
 
 type Day = {
@@ -219,31 +221,47 @@ const groupWorkoutsByDay = (workouts: any[]) => {
               <Text style={styles.summaryLabel}>WORKOUTS</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 16 }}>
+  
+<Animated.View 
+  entering={FadeInDown.duration(500)}
+  style={styles.buttonContainer}
+>
   <TouchableOpacity
     onPress={() => router.push('/StatsScreen/progress')}
-    style={{
-      backgroundColor: '#6c5ce7',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 12,
-    }}
+    style={[styles.actionButton, { backgroundColor: '#6c5ce7' }]}
+    activeOpacity={0.8}
   >
-    <Text style={{ color: '#fff', fontWeight: 'bold' }}>📊 Charts</Text>
+    <LinearGradient
+      colors={['#6c5ce7', '#a29bfe']}
+      style={styles.gradient}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+    >
+      <View style={styles.buttonContent}>
+        <MaterialIcons name="insert-chart" size={20} color="white" />
+        <Text style={styles.buttonText}>Progress Charts</Text>
+      </View>
+    </LinearGradient>
   </TouchableOpacity>
 
   <TouchableOpacity
     onPress={() => router.push('/StatsScreen/Streak')}
-    style={{
-      backgroundColor: '#00b894',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 12,
-    }}
+    style={[styles.actionButton, { backgroundColor: '#00b894' }]}
+    activeOpacity={0.8}
   >
-    <Text style={{ color: '#fff', fontWeight: 'bold' }}>🔥 Streak Tracker</Text>
+    <LinearGradient
+      colors={['#00b894', '#55efc4']}
+      style={styles.gradient}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+    >
+      <View style={styles.buttonContent}>
+        <MaterialIcons name="whatshot" size={20} color="white" />
+        <Text style={styles.buttonText}>Streak Tracker</Text>
+      </View>
+    </LinearGradient>
   </TouchableOpacity>
-</View>
+</Animated.View>
 
           {/* History */}
           <View style={styles.sectionContainer}>
@@ -492,6 +510,38 @@ workoutTypeText: {
   fontSize: 14,
   fontWeight: 'bold',
 },
+buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
+    paddingHorizontal: 10,
+  },
+  actionButton: {
+    width: '48%',
+    borderRadius: 14,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  gradient: {
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+    textAlign: 'center',
+  },
 
 });
 
